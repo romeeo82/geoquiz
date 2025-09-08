@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Geo Flag Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main class="main-content">
+    <div id="map">
+      <!-- Sidebar overlay -->
+      <div class="sidebar-overlay">
+        <div id="counters" class="counters">
+          <p><span class="icon total">∑</span> <span id="total">0</span></p>
+          <p><span class="icon correct">✔</span> <span id="correct">0</span></p>
+          <p><span class="icon wrong">✘</span> <span id="wrong">0</span></p>
+          <span id="feedback" class="feedback"></span>
+        </div>
+        <ul id="history"></ul>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
