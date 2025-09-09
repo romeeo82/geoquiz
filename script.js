@@ -40,8 +40,23 @@ L.tileLayer(
   { attribution: 'Tiles © Esri' }
 ).addTo(map);
 
-let geojsonLayer, countries = [], currentCountry;
+let geojsonLayer, countries = [], remainingCountries = [], currentCountry;
 let total = 0, correct = 0, wrong = 0;
+
+// Load GeoJSON with all countries
+fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
+  .then(res => res.json())
+  .then(data => {
+    countries = data.features;
+    remainingCountries = [...countries]; // copy for questions
+
+    geojsonLayer = L.geoJSON(countries, {
+      style: { color: "#555", weight: 1, fillOpacity: 0.2 },
+      onEachFeature: onEachFeature
+    }).addTo(map);
+
+    nextQuestion();
+  });
 
 // --- Custom control for question on the map (top-center) ---
 const QuestionControl = L.Control.extend({
@@ -74,23 +89,6 @@ const questionBoxEl = document.querySelector(".question-box");
 questionEl.textContent = "Loading…";
 flagEl.style.display = "none";
 
-// Load GeoJSON and keep only countries that have a known flag
-fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
-  .then(res => res.json())
-  .then(data => {
-    countries = data.features.filter(f => {
-      const iso3 = f.id || f.properties?.iso_a3;
-      return iso3 && iso3to2[iso3]; // include only those we can map to ISO2
-    });
-
-    geojsonLayer = L.geoJSON(countries, {
-      style: { color: "#555", weight: 1, fillOpacity: 0.2 },
-      onEachFeature: onEachFeature
-    }).addTo(map);
-
-    nextQuestion();
-  });
-
 // Per-country click handler
 function onEachFeature(feature, layer) {
   layer.on('click', () => {
@@ -103,16 +101,22 @@ function onEachFeature(feature, layer) {
       correct++;
       addHistory(currentCountry.properties.name, true);
       layer.setStyle({ fillColor: "green", fillOpacity: 0.6 });
-    } else {
+      // Return map to global view
+      map.setView([20, 0], 2);
+    }
+    else {
       wrong++;
       addHistory(currentCountry.properties.name, false);
-      layer.setStyle({ fillColor: "red", fillOpacity: 0.6 });
-
-      // Highlight and zoom to the correct country (yellow if revealed after mistake)
+      // Highlight and zoom to the correct country
       geojsonLayer.eachLayer(l => {
         if (l.feature.id === currentCountry.id) {
-          l.setStyle({ fillColor: "yellow", fillOpacity: 0.6 });
+          l.setStyle({ fillColor: "red", fillOpacity: 0.6 });
           map.fitBounds(l.getBounds(), { padding: [20, 20], maxZoom: 5 });
+
+          // After 1 second, reset to global view
+          setTimeout(() => {
+            map.setView([20, 0], 2);
+          }, 1000);
         }
       });
     }
@@ -123,20 +127,31 @@ function onEachFeature(feature, layer) {
 }
 
 function nextQuestion() {
-  // Pick a random country
-  currentCountry = countries[Math.floor(Math.random() * countries.length)];
+  // If no countries left → give a meessage and stop
+  if (countries.length === 0) {
+    questionEl.textContent = "🎉 Quiz completed! Reload the page to play again.";
+    flagEl.style.display = "none";
+    return;
+  }
+
+  // Pick a random country from the remaining list
+  const idx = Math.floor(Math.random() * remainingCountries.length);
+  currentCountry = remainingCountries[idx];
+
+  // Remove the chosen country so it won't repeat
+  remainingCountries.splice(idx, 1);
 
   const iso3 = currentCountry.id || currentCountry.properties?.iso_a3;
   const iso2 = iso3to2[iso3];
 
-  // Fade out the whole box
+  // Fade out the whole question box (for smooth transition)
   questionBoxEl.classList.remove("visible");
 
   setTimeout(() => {
-    // Update text
+    // Update question text
     questionEl.textContent = "Where is " + currentCountry.properties.name + "?";
 
-    // Update flag
+    // Update flag (show only if available)
     if (iso2) {
       flagEl.style.display = "none";
       flagEl.onload = () => {
@@ -151,9 +166,9 @@ function nextQuestion() {
       flagEl.removeAttribute("src");
     }
 
-    // Fade in the whole box
+    // Fade in the updated question box
     questionBoxEl.classList.add("visible");
-  }, 300); // match the CSS fade-out duration
+  }, 300); // match CSS fade-out duration
 }
 
 // Update counters panel
