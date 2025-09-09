@@ -119,6 +119,7 @@ body {
   font-size: 1.2em;
 }
 
+.icon.question { color: darkorange; }
 .icon.total { color: blue; }
 .icon.correct { color: green; }
 .icon.wrong { color: red; }

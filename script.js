@@ -41,7 +41,7 @@ L.tileLayer(
 ).addTo(map);
 
 let geojsonLayer, countries = [], remainingCountries = [], currentCountry;
-let total = 0, correct = 0, wrong = 0;
+let totalQuestions = 0, total = 0, correct = 0, wrong = 0;
 
 // Load GeoJSON with all countries
 fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json")
@@ -49,6 +49,7 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
   .then(data => {
     countries = data.features;
     remainingCountries = [...countries]; // copy for questions
+    totalQuestions = countries.length;
 
     geojsonLayer = L.geoJSON(countries, {
       style: { color: "#555", weight: 1, fillOpacity: 0.2 },
@@ -56,6 +57,7 @@ fetch("https://raw.githubusercontent.com/johan/world.geo.json/master/countries.g
     }).addTo(map);
 
     nextQuestion();
+    updateCounters();
   });
 
 // --- Custom control for question on the map (top-center) ---
@@ -108,7 +110,7 @@ function onEachFeature(feature, layer) {
         map.setView([20, 0], 2);
         updateCounters();
       }, 1000);
-    } 
+    }
     else {
       wrong++;
       addHistory(currentCountry.properties.name, false);
@@ -182,6 +184,7 @@ function updateCounters() {
   document.getElementById("total").textContent = total;
   document.getElementById("correct").textContent = correct;
   document.getElementById("wrong").textContent = wrong;
+  document.getElementById("remaining").textContent = remainingCountries.length;
 }
 
 // History item: colored icon + plain text
