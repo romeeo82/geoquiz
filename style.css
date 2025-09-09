@@ -15,11 +15,11 @@ body {
 .main-content {
   width: 100%;
   height: 100vh;
-  position: relative;
+  display: flex;              /* карта + сайдбар рядом */
 }
 
 #map {
-  width: 100%;
+  flex: 1;                    /* карта занимает всё оставшееся */
   height: 100%;
   position: relative;
 }
@@ -66,18 +66,14 @@ body {
   border-radius: 4px;
 }
 
-/* Sidebar overlay inside map */
-.sidebar-overlay {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 140px;
-  max-height: 75vh;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 10px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+/* Sidebar (отдельно справа от карты) */
+.sidebar {
+  width: 160px;
+  max-height: 100vh;
+  background: #E0F7FA;
+  border-left: 1px solid #ddd;
+  padding: 12px;
+  box-shadow: -3px 0 8px rgba(0,0,0,0.1);
   overflow-y: auto;
   z-index: 1000;
 }

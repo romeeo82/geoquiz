@@ -101,30 +101,36 @@ function onEachFeature(feature, layer) {
       correct++;
       addHistory(currentCountry.properties.name, true);
       layer.setStyle({ fillColor: "green", fillOpacity: 0.6 });
-      // Return map to global view
-      map.setView([20, 0], 2);
-    }
+
+      showFeedback(true);
+      // Delay 0.5s, then reset map and show next question
+      setTimeout(() => {
+        map.setView([20, 0], 2);
+        updateCounters();
+      }, 1000);
+    } 
     else {
       wrong++;
       addHistory(currentCountry.properties.name, false);
+
       // Highlight and zoom to the correct country
       geojsonLayer.eachLayer(l => {
         if (l.feature.id === currentCountry.id) {
           l.setStyle({ fillColor: "red", fillOpacity: 0.6 });
           map.fitBounds(l.getBounds(), { padding: [20, 20], maxZoom: 5 });
 
+          showFeedback(false);
           // After 1 second, reset to global view
           setTimeout(() => {
             map.setView([20, 0], 2);
+            updateCounters();
           }, 1000);
         }
       });
     }
-
-    updateCounters();
-    showFeedback(isCorrect);
   });
 }
+
 
 function nextQuestion() {
   // If no countries left → give a meessage and stop
