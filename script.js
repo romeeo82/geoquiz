@@ -91,11 +91,17 @@ const questionBoxEl = document.querySelector(".question-box");
 questionEl.textContent = "Loading…";
 flagEl.style.display = "none";
 
+let isClickLocked = false;
+const timeOut = 1000;
 // Per-country click handler
 function onEachFeature(feature, layer) {
   layer.on('click', () => {
-    if (!currentCountry) return;
+    if (!currentCountry ||
+      isClickLocked ||
+      (!remainingCountries.some(c => c.id === feature.id) && currentCountry.id !== feature.id))
+      return;
 
+    isClickLocked = true;
     total++;
     const isCorrect = feature.id === currentCountry.id;
 
@@ -105,11 +111,12 @@ function onEachFeature(feature, layer) {
       layer.setStyle({ fillColor: "green", fillOpacity: 0.6 });
 
       showFeedback(true);
-      // Delay 0.5s, then reset map and show next question
+      // Delay 1s, then reset map and show next question
       setTimeout(() => {
-        map.setView([20, 0], 2);
+        zoomOutToGlobalView();
         updateCounters();
-      }, 1000);
+        isClickLocked = false;
+      }, timeOut);
     }
     else {
       wrong++;
@@ -119,20 +126,29 @@ function onEachFeature(feature, layer) {
       geojsonLayer.eachLayer(l => {
         if (l.feature.id === currentCountry.id) {
           l.setStyle({ fillColor: "red", fillOpacity: 0.6 });
-          map.fitBounds(l.getBounds(), { padding: [20, 20], maxZoom: 5 });
+          zoomInCountry(l);
 
           showFeedback(false);
           // After 1 second, reset to global view
           setTimeout(() => {
-            map.setView([20, 0], 2);
+            zoomOutToGlobalView();
             updateCounters();
-          }, 1000);
+            isClickLocked = false;
+          }, timeOut);
         }
       });
     }
   });
 }
 
+
+function zoomInCountry(l) {
+  map.fitBounds(l.getBounds(), { padding: [20, 20], maxZoom: 5 });
+}
+
+function zoomOutToGlobalView() {
+  map.setView([20, 0], 2);
+}
 
 function nextQuestion() {
   // If no countries left → give a meessage and stop
