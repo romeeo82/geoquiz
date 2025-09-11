@@ -14,11 +14,11 @@ body {
 .main-content {
   width: 100%;
   height: 100vh;
-  display: flex;              /* карта + сайдбар рядом */
+  display: flex;
 }
 
 #map {
-  flex: 1;                    /* карта занимает всё оставшееся */
+  flex: 1;
   height: 100%;
   position: relative;
 }
@@ -36,7 +36,8 @@ body {
 
 /* Question box */
 .question-box {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(224, 247, 250, 0.8);
+  opacity: 0.8;
   border-radius: 12px;
   padding: 8px 16px;
   font-family: 'Comic Neue', sans-serif;
@@ -46,33 +47,36 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   pointer-events: auto;
 
-  opacity: 0;                     /* hidden by default */
-  transition: opacity 0.5s ease;  /* fade effect */
+  opacity: 0;
+  /* hidden by default */
+  transition: opacity 0.5s ease;
+  /* fade effect */
 }
 
 .question-box.visible {
-  opacity: 1;                     /* show with fade */
+  opacity: 1;
+  /* show with fade */
 }
 
 /* Flag */
 .question-box img {
   height: 24px;
   width: auto;
-  border: 1px solid #ccc;
+  border: 2px solid #ccc;
   border-radius: 4px;
 }
 
-/* Sidebar (отдельно справа от карты) */
+/* Sidebar */
 .sidebar {
   width: 160px;
   max-height: 100vh;
   background: #E0F7FA;
   border-left: 1px solid #ddd;
   padding: 12px;
-  box-shadow: -3px 0 8px rgba(0,0,0,0.1);
+  box-shadow: -3px 0 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   z-index: 1000;
 }
@@ -99,7 +103,7 @@ body {
   background: rgba(255, 255, 255, 0);
   border-radius: 8px;
   border: 1px solid #ddd;
-  font-size: 0.9em;
+  font-size: 1.2em;
 }
 
 .counters p {
@@ -118,10 +122,21 @@ body {
   font-size: 1.2em;
 }
 
-.icon.question { color: darkorange; }
-.icon.total { color: blue; }
-.icon.correct { color: green; }
-.icon.wrong { color: red; }
+.icon.question {
+  color: darkorange;
+}
+
+.icon.total {
+  color: blue;
+}
+
+.icon.correct {
+  color: green;
+}
+
+.icon.wrong {
+  color: red;
+}
 
 /* History */
 #history {
@@ -133,9 +148,14 @@ body {
 #history li {
   padding: 3px 0;
   border-bottom: 1px solid #eee;
-  font-size: 0.85em;
+  font-size: 1.2em;
   text-align: center;
 }
 
-.correct { color: green; }
-.wrong { color: red; }
+.correct {
+  color: green;
+}
+
+.wrong {
+  color: red;
+}
