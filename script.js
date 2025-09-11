@@ -32,13 +32,28 @@ const map = L.map('map', {
   minZoom: 2,
   maxBounds: [[-90, -180], [90, 180]],
   maxBoundsViscosity: 1.0
-}).setView([20, 0], 2);
+});
 
-// Esri physical tiles
-L.tileLayer(
+// Country names map
+const kidsLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+  {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 18
+  }
+);
+
+// Physical map
+const adultLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}',
-  { attribution: 'Tiles © Esri' }
-).addTo(map);
+  {
+    attribution: 'Tiles © Esri'
+
+  }
+);
+
+// Start with adult layer
+let currentBaseLayer = adultLayer.addTo(map);
 
 let geojsonLayer, countries = [], remainingCountries = [], currentCountry;
 let totalQuestions = 0, total = 0, correct = 0, wrong = 0;
@@ -81,6 +96,16 @@ map._controlCorners['topcenter'] =
   L.DomUtil.create('div', 'leaflet-top leaflet-center', map._controlContainer);
 map.addControl(new QuestionControl());
 
+function zoomInCountry(l) {
+  map.fitBounds(l.getBounds(), { padding: [20, 20], maxZoom: 5 });
+}
+
+function zoomOutToGlobalView(zoomLevel = 2) {
+  map.setView([20, 0], zoomLevel, { animate: true, duration: 1 });
+}
+
+zoomOutToGlobalView();
+
 // Grab DOM refs after control is mounted
 const questionEl = document.getElementById("question");
 const flagEl = document.getElementById("flag");
@@ -91,9 +116,26 @@ const questionBoxEl = document.querySelector(".question-box");
 questionEl.textContent = "Loading…";
 flagEl.style.display = "none";
 
+// Kids Mode toggle
+let kidsMode = false;
+document.getElementById("kidsModeCheckbox").addEventListener("change", e => {
+  kidsMode = e.target.checked;
+
+  if (currentBaseLayer) {
+    map.removeLayer(currentBaseLayer);
+  }
+
+  if (kidsMode) {
+    currentBaseLayer = kidsLayer.addTo(map);
+  }
+  else {
+    currentBaseLayer = adultLayer.addTo(map);
+  }
+});
+
+// Per-country click handler
 let isClickLocked = false;
 const timeOut = 1000;
-// Per-country click handler
 function onEachFeature(feature, layer) {
   layer.on('click', () => {
     if (!currentCountry ||
@@ -141,14 +183,6 @@ function onEachFeature(feature, layer) {
   });
 }
 
-
-function zoomInCountry(l) {
-  map.fitBounds(l.getBounds(), { padding: [20, 20], maxZoom: 5 });
-}
-
-function zoomOutToGlobalView() {
-  map.setView([20, 0], 2);
-}
 
 function nextQuestion() {
   // If no countries left → give a meessage and stop
