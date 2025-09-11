@@ -136,7 +136,7 @@ function onEachFeature(feature, layer) {
 
 function nextQuestion() {
   // If no countries left → give a meessage and stop
-  if (countries.length === 0) {
+  if (remainingCountries.length === 0) {
     questionEl.textContent = "🎉 Quiz completed! Reload the page to play again.";
     flagEl.style.display = "none";
     return;
