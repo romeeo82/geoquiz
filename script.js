@@ -210,11 +210,11 @@ async function showReward() {
     };
 
     // Close when clicking outside the modal content
-    // window.onclick = (event) => {
-    //   if (event.target === modal) {
-    //     modal.style.display = "none";
-    //   }
-    // };
+    window.onclick = (event) => {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
   }
 
   const img = modal.querySelector('#rewardImage');
@@ -305,7 +305,7 @@ function addHistory(countryName, isCorrect) {
   const li = document.createElement("li");
 
   const icon = document.createElement("span");
-  icon.textContent = isCorrect ? "✔" : "✘";
+  icon.textContent = isCorrect ? "✓" : "✘";
   icon.className = isCorrect ? "correct" : "wrong";
 
   const text = document.createElement("span");
@@ -318,7 +318,7 @@ function addHistory(countryName, isCorrect) {
 
 // Feedback inside counters, then auto-next
 function showFeedback(isCorrect) {
-  feedbackEl.textContent = isCorrect ? "✔" : "✘";
+  feedbackEl.textContent = isCorrect ? "✓" : "✘";
   feedbackEl.style.color = isCorrect ? "green" : "red";
   feedbackEl.style.opacity = 1;
   feedbackEl.style.transform = "translateY(-55%) scale(1.2)";
