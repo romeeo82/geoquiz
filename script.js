@@ -48,7 +48,6 @@ const adultLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}',
   {
     attribution: 'Tiles © Esri'
-
   }
 );
 
@@ -158,6 +157,9 @@ function onEachFeature(feature, layer) {
         zoomOutToGlobalView();
         updateCounters();
         isClickLocked = false;
+        // Show reward every 3 correct answers if enabled
+        if (document.getElementById('rewardCheckbox').checked && correct % 3 === 0)
+          showReward();
       }, timeOut);
     }
     else {
@@ -183,12 +185,73 @@ function onEachFeature(feature, layer) {
   });
 }
 
+// Reward
+async function showReward() {
+  const imageUrl = await fetchRewardImage();
+
+  let modal = document.getElementById('rewardModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'rewardModal';
+    modal.className = 'reward-modal';
+
+    modal.innerHTML = `
+      <div class="reward-modal-content">
+        <span class="reward-close">&times;</span>
+        <p class="reward-text">🎉Well Done!</p>
+        <img id="rewardImage" src="" alt="Reward!" />
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('.reward-close').onclick = () => {
+      modal.style.display = "none";
+    };
+
+    // Close when clicking outside the modal content
+    // window.onclick = (event) => {
+    //   if (event.target === modal) {
+    //     modal.style.display = "none";
+    //   }
+    // };
+  }
+
+  const img = modal.querySelector('#rewardImage');
+  img.src = imageUrl;
+
+  modal.style.display = "block";
+}
+
+let usedUrls = new Set();
+async function fetchRewardImage() {
+  const gifAPIs = [
+    'https://cataas.com/cat/gif?json=true',
+    'https://api.thecatapi.com/v1/images/search?mime_types=gif'
+  ];
+
+  while (true) {
+    const api = gifAPIs[Math.floor(Math.random() * gifAPIs.length)];
+    const res = await fetch(api);
+    const data = await res.json();
+    let url = '';
+
+    if (api.includes('cataas')) url = data.url.startsWith('http') ? data.url : 'https://cataas.com' + data.url;
+    else if (api.includes('thecatapi')) url = data[0].url;
+
+    if (url && !url.match(/\.(mp4|webm|avi|mov)$/i) && !usedUrls.has(url)) {
+      usedUrls.add(url);
+      return url;
+    }
+  }
+}
 
 function nextQuestion() {
   // If no countries left → give a meessage and stop
   if (remainingCountries.length === 0) {
     questionEl.textContent = "🎉 Quiz completed! Reload the page to play again.";
     flagEl.style.display = "none";
+    showReward();
     return;
   }
 
