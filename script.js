@@ -169,13 +169,12 @@ function onEachFeature(feature, layer) {
     else {
       wrong++;
       addHistory(currentCountry.properties.name, false);
-
       // Highlight and zoom to the correct country
       geojsonLayer.eachLayer(l => {
         if (l.feature.id === currentCountry.id) {
-          l.setStyle({ fillColor: "red", fillOpacity: 0.6 });
-          zoomInCountry(l);
+          l.setStyle({ fillColor: "yellow", fillOpacity: 0.6 });
 
+          zoomInCountry(l);
           showFeedback(false);
           removeCountryFromRemaining();
 
@@ -183,6 +182,7 @@ function onEachFeature(feature, layer) {
           setTimeout(() => {
             zoomOutToGlobalView();
             updateCounters();
+            l.setStyle({ fillColor: "red", fillOpacity: 0.6 });
             isClickLocked = false;
           }, timeOut);
         }
@@ -211,7 +211,7 @@ function nextQuestion() {
     return;
   }
 
- // Pick a random country
+  // Pick a random country
   const idx = Math.floor(Math.random() * remainingCountries.length);
   currentCountry = remainingCountries[idx];
   // Save index inside the object, so onEachFeature can remove it later
