@@ -154,6 +154,8 @@ function onEachFeature(feature, layer) {
       layer.setStyle({ fillColor: "green", fillOpacity: 0.6 });
 
       showFeedback(true);
+      removeCountryFromRemaining();
+
       // Delay 1s, then reset map and show next question
       setTimeout(() => {
         zoomOutToGlobalView();
@@ -175,6 +177,8 @@ function onEachFeature(feature, layer) {
           zoomInCountry(l);
 
           showFeedback(false);
+          removeCountryFromRemaining();
+
           // After 1 second, reset to global view
           setTimeout(() => {
             zoomOutToGlobalView();
@@ -185,6 +189,62 @@ function onEachFeature(feature, layer) {
       });
     }
   });
+}
+
+function removeCountryFromRemaining() {
+  if (currentCountry && typeof currentCountry._idx === "number") {
+    remainingCountries.splice(currentCountry._idx, 1);
+    delete currentCountry._idx;
+  }
+}
+
+// Show next question
+function nextQuestion() {
+
+  // dumpCountries();
+
+  // If no countries left → give a meessage and stop
+  if (remainingCountries.length === 0) {
+    questionEl.textContent = "🎉 Quiz completed! Reload the page to play again.";
+    flagEl.style.display = "none";
+    showReward();
+    return;
+  }
+
+ // Pick a random country
+  const idx = Math.floor(Math.random() * remainingCountries.length);
+  currentCountry = remainingCountries[idx];
+  // Save index inside the object, so onEachFeature can remove it later
+  currentCountry._idx = idx;
+
+  const iso3 = currentCountry.id || currentCountry.properties?.iso_a3;
+  const iso2 = iso3to2[iso3];
+
+  // Fade out the whole question box (for smooth transition)
+  questionBoxEl.classList.remove("visible");
+
+  setTimeout(() => {
+    // Update question text
+    questionEl.textContent = "Where is " + currentCountry.properties.name + "?";
+
+    // Update flag (show only if available)
+    if (iso2) {
+      flagEl.style.display = "none";
+      flagEl.onload = () => {
+        flagEl.style.display = "inline-block";
+      };
+      flagEl.onerror = () => {
+        flagEl.style.display = "none";
+      };
+      flagEl.src = "https://flagcdn.com/w80/" + iso2 + ".png";
+    } else {
+      flagEl.style.display = "none";
+      flagEl.removeAttribute("src");
+    }
+
+    // Fade in the updated question box
+    questionBoxEl.classList.add("visible");
+  }, 300); // match CSS fade-out duration
 }
 
 // Reward
@@ -248,52 +308,6 @@ async function fetchRewardImage() {
   }
 }
 
-function nextQuestion() {
-  // If no countries left → give a meessage and stop
-  if (remainingCountries.length === 0) {
-    questionEl.textContent = "🎉 Quiz completed! Reload the page to play again.";
-    flagEl.style.display = "none";
-    showReward();
-    return;
-  }
-
-  // Pick a random country from the remaining list
-  const idx = Math.floor(Math.random() * remainingCountries.length);
-  currentCountry = remainingCountries[idx];
-
-  // Remove the chosen country so it won't repeat
-  remainingCountries.splice(idx, 1);
-
-  const iso3 = currentCountry.id || currentCountry.properties?.iso_a3;
-  const iso2 = iso3to2[iso3];
-
-  // Fade out the whole question box (for smooth transition)
-  questionBoxEl.classList.remove("visible");
-
-  setTimeout(() => {
-    // Update question text
-    questionEl.textContent = "Where is " + currentCountry.properties.name + "?";
-
-    // Update flag (show only if available)
-    if (iso2) {
-      flagEl.style.display = "none";
-      flagEl.onload = () => {
-        flagEl.style.display = "inline-block";
-      };
-      flagEl.onerror = () => {
-        flagEl.style.display = "none";
-      };
-      flagEl.src = "https://flagcdn.com/w80/" + iso2 + ".png";
-    } else {
-      flagEl.style.display = "none";
-      flagEl.removeAttribute("src");
-    }
-
-    // Fade in the updated question box
-    questionBoxEl.classList.add("visible");
-  }, 300); // match CSS fade-out duration
-}
-
 // Update counters panel
 function updateCounters() {
   document.getElementById("total").textContent = total;
@@ -330,4 +344,10 @@ function showFeedback(isCorrect) {
     feedbackEl.style.transform = "translateY(-55%) scale(1)";
     nextQuestion();
   }, timeOut);
+}
+
+// For debugging: dump remaining countries to console
+function dumpCountries() {
+  const names = remainingCountries.map(c => c.properties.name);
+  console.log(names.join("\n"));
 }
