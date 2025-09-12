@@ -115,6 +115,9 @@ const questionBoxEl = document.querySelector(".question-box");
 questionEl.textContent = "Loading…";
 flagEl.style.display = "none";
 
+// General consts
+const timeOut = 1000;
+
 // Kids Mode toggle
 let kidsMode = false;
 document.getElementById("kidsModeCheckbox").addEventListener("change", e => {
@@ -134,7 +137,6 @@ document.getElementById("kidsModeCheckbox").addEventListener("change", e => {
 
 // Per-country click handler
 let isClickLocked = false;
-const timeOut = 1000;
 function onEachFeature(feature, layer) {
   layer.on('click', () => {
     if (!currentCountry ||
@@ -327,5 +329,5 @@ function showFeedback(isCorrect) {
     feedbackEl.style.opacity = 0;
     feedbackEl.style.transform = "translateY(-55%) scale(1)";
     nextQuestion();
-  }, 1000);
+  }, timeOut);
 }
